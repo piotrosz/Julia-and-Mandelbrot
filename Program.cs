@@ -10,8 +10,8 @@ namespace JuliaAndMandelbrot
     {
         static void Main()
         {
-            //CreateJulia();
-            CreateMandelbrot();
+            CreateJulia();
+            //CreateMandelbrot();
         }
 
         private static void CreateJulia()
@@ -23,7 +23,7 @@ namespace JuliaAndMandelbrot
                 area: area,
                 level: 20);
             var set = juliaSet.Create(
-                c: new Complex(0.336, -0.39),
+                parameter: new Complex(0.336, -0.39),
                 delta: 0.003);
                 
             SaveImage(area, set, "JuliaSet.png", 300);
@@ -39,7 +39,7 @@ namespace JuliaAndMandelbrot
                 area: area,
                 level: 100);
             var set = mandelbrot.Create(
-                zStart: new Complex(0.0001, 0.0001),
+                parameter: new Complex(0.0001, 0.0001),
                 delta: 0.001);
             SaveImage(area, set, "MandelbrotSet.png", 400);
         }
