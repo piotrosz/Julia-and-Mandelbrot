@@ -7,7 +7,7 @@ namespace JuliaAndMandelbrot
         public JuliaSet(int iterations, Area area, double level) 
             : base(iterations, area, level) {}
         
-        protected override Complex CreateCore(Complex current, Complex parameter)
+        protected override Complex? CreateCore(Complex current, Complex parameter)
         {
             return this.Iterate(
                 initial: current, 

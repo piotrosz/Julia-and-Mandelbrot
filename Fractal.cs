@@ -28,17 +28,17 @@ namespace JuliaAndMandelbrot
                 {
                     var point = this.CreateCore(new Complex(real, imaginary), parameter);
 
-                    if (point != 0)
+                    if (point != null)
                     {
-                        yield return point;
+                        yield return point.Value;
                     }
                 }
             }
         }
 
-        protected abstract Complex CreateCore(Complex current, Complex parameter);
+        protected abstract Complex? CreateCore(Complex current, Complex parameter);
 
-        protected Complex Iterate(Complex initial, Complex offset, Complex returnValue)
+        protected Complex? Iterate(Complex initial, Complex offset, Complex returnValue)
         {
             var z1 = initial;
             for (int i = 0; i < iterations; i++)
@@ -49,7 +49,7 @@ namespace JuliaAndMandelbrot
                     return returnValue;
                 }
             }
-            return 0;
+            return null;
         }
     }
 }
