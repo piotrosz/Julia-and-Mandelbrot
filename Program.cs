@@ -35,12 +35,12 @@ namespace JuliaAndMandelbrot
                 upperRight: new Complex(0.8, 1.2),
                 lowerLeft: new Complex(-1.8, -1.2));
             var mandelbrot = new MandelbrotSet(
-                iterations: 150,
+                iterations: 100,
                 area: area,
                 level: 100);
             var set = mandelbrot.Create(
                 zStart: new Complex(0.0001, 0.0001),
-                delta: 0.0005);
+                delta: 0.001);
             SaveImage(area, set, "MandelbrotSet.png", 400);
         }
 
@@ -58,7 +58,7 @@ namespace JuliaAndMandelbrot
 
             using (var bitmap = new Bitmap(Convert.ToInt32(width), Convert.ToInt32(height)))
             {
-                using (Graphics graphics = Graphics.FromImage(bitmap))
+                using (var graphics = Graphics.FromImage(bitmap))
                 {
                     graphics.Clear(Color.White);
                     var pen = new Pen(Color.Black, 1);
