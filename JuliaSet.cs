@@ -1,7 +1,5 @@
-#region Using
-using System;
-using System.Data;
-#endregion
+using System.Collections.Generic;
+using System.Numerics;
 
 namespace JuliaAndMandelbrot
 {
@@ -9,28 +7,26 @@ namespace JuliaAndMandelbrot
     {
         private Complex z;
 
-        public JuliaSet()
-            : base()
+        public JuliaSet(int iterations, Area area, double level) 
+            : base(iterations, area, level)
         {
             this.z = new Complex();
         }
 
-        public override void Create(Complex c, double delta, int iterations, Area area, double level)
+        public override IEnumerable<Complex> Create(Complex c, double delta)
         {
-            double real, imag;
-            for (real = area.MinX; real < area.MaxX; real += delta)
+            for (double real = area.LowerLeft.Real; real < area.UpperRight.Real; real += delta)
             {
-                for (imag = area.MinY; imag < area.MaxY; imag += delta)
+                for (double imaginary = area.LowerLeft.Imaginary; imaginary < area.UpperRight.Imaginary; imaginary += delta)
                 {
-                    this.z.Re = real;
-                    this.z.Im = imag;
-                    for (i = 0; i < iterations; i++)
+                    this.z = new Complex(real, imaginary);
+
+                    for (int i = 0; i < iterations; i++)
                     {
                         this.z = this.z * this.z + c;
-                        if (z.GetModulus() > level)
+                        if (z.Magnitude > level)
                         {
-                            set.Add(new Complex(real, imag));
-                            break;
+                            yield return new Complex(real, imaginary);
                         }
                     }
                 }

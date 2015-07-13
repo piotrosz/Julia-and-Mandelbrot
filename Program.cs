@@ -1,65 +1,73 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Numerics;
 
 namespace JuliaAndMandelbrot
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            // -- Julia set --
-            var juliaSet = new JuliaSet();
-            juliaSet.Create(
-                c: new Complex(0.336, -0.39),
-                delta: 0.003,
-                iterations: 100,
-                area: new Area(-1.0, 1.0, -1.0, 1.0),
-                level: 20);
-            SaveImage(juliaSet.Set, "JuliaSet.png", 300);
-
-            // -- Mandelbrot set --
-            //var mandelbrot = new MandelbrotSet();
-            //mandelbrot.Create(
-            //    z: new Complex(0.0001, 0.0001),
-            //    delta: 0.001,
-            //    iterations: 100,
-            //    area: new Area(-1.8, 0.8, -1.2, 1.2),
-            //    level: 10);
-            //SaveImage(mandelbrot.Set, "MandelbrotSet.png", 300);
+            //CreateJulia();
+            CreateMandelbrot();
         }
 
-        static void SaveImage(List<Complex> set, string fileName, float scale)
+        private static void CreateJulia()
         {
-            float minX = 0, maxX = 0, minY = 0, maxY = 0;
-            foreach (Complex c in set)
-            {
-                minX = (float)Math.Min(minX, c.Re);
-                maxX = (float)Math.Max(maxX, c.Re);
-                minY = (float)Math.Min(minY, c.Im);
-                maxY = (float)Math.Max(maxY, c.Im);
-            }
-            float width = scale * (maxX - minX);
-            float height = scale * (maxY - minY);
-            float xOffset = Math.Abs(minX * scale);
-            float yOffset = Math.Abs(minY * scale);
+            var area = new Area(
+                upperRight: new Complex(1, 2),
+                lowerLeft: new Complex(-1, -1));
+            var juliaSet = new JuliaSet(iterations: 100,
+                area: area,
+                level: 20);
+            var set = juliaSet.Create(
+                c: new Complex(0.336, -0.39),
+                delta: 0.003);
+                
+            SaveImage(area, set, "JuliaSet.png", 300);
+        }
 
-            using (Bitmap bitmap = new Bitmap(Convert.ToInt32(width), Convert.ToInt32(height)))
+        private static void CreateMandelbrot()
+        {
+            var area = new Area(
+                upperRight: new Complex(0.8, 1.2),
+                lowerLeft: new Complex(-1.8, -1.2));
+            var mandelbrot = new MandelbrotSet(
+                iterations: 150,
+                area: area,
+                level: 100);
+            var set = mandelbrot.Create(
+                zStart: new Complex(0.0001, 0.0001),
+                delta: 0.0005);
+            SaveImage(area, set, "MandelbrotSet.png", 400);
+        }
+
+        static void SaveImage(Area area, IEnumerable<Complex> set, string fileName, float scale)
+        {
+            var minX = area.LowerLeft.Real;
+            var maxX = area.UpperRight.Real;
+            var minY = area.LowerLeft.Imaginary;
+            var maxY = area.UpperRight.Imaginary;
+            
+            var width = scale * (maxX - minX);
+            var height = scale * (maxY - minY);
+            var xOffset = Math.Abs(minX * scale);
+            var yOffset = Math.Abs(minY * scale);
+
+            using (var bitmap = new Bitmap(Convert.ToInt32(width), Convert.ToInt32(height)))
             {
                 using (Graphics graphics = Graphics.FromImage(bitmap))
                 {
                     graphics.Clear(Color.White);
-                    Pen pen = new Pen(Color.Black, 1);
-                    float x, y;
+                    var pen = new Pen(Color.Black, 1);
 
                     foreach (Complex c in set)
                     {
-                        x = (float)((c.Re / (maxX - minX)) * width + xOffset);
-                        y = (float)((c.Im / (maxY - minY)) * height + yOffset);
-                        graphics.DrawLine(pen, x, y, x + 1, y);
+                        var x = ((c.Real / (maxX - minX)) * width + xOffset);
+                        var y = ((c.Imaginary / (maxY - minY)) * height + yOffset);
+                        graphics.DrawLine(pen, (float)x, (float)y, (float)(x + 1d), (float)y);
                     }
                     bitmap.Save(fileName, ImageFormat.Png);
                 }

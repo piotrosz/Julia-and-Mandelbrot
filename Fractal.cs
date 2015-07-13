@@ -1,36 +1,21 @@
-using System;
-using System.Data;
 using System.Collections.Generic;
-using System.IO;
+using System.Numerics;
 
 namespace JuliaAndMandelbrot
 {
-    public class Fractal
+    public abstract class Fractal
     {
-        protected int i;
+        protected readonly int iterations;
+        protected readonly Area area;
+        protected readonly double level;
 
-        protected List<Complex> set;
-        public List<Complex> Set
+        protected Fractal(int iterations, Area area, double level)
         {
-            get { return this.set; }
+            this.iterations = iterations;
+            this.area = area;
+            this.level = level;
         }
 
-        protected Fractal()
-        {
-            this.set = new List<Complex>();
-        }
-
-        public virtual void Create(Complex c, double delta, int iterations, Area area, double level)
-        { }
-
-        public void ToFile(string Path)
-        {
-            using (StreamWriter streamWriter = File.CreateText(Path))
-            {
-                foreach (Complex c in set)
-                    streamWriter.WriteLine("{0};{1};", c.Re, c.Im);
-                streamWriter.Close();
-            }
-        }
+        public abstract IEnumerable<Complex> Create(Complex c, double delta);
     }
 }
