@@ -47,7 +47,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Area.cs" />
+    <Compile Include="FractalParameters.cs" />
+    <Compile Include="IterateSinglePointResult.cs" />
+    <Compile Include="IterationsToColorConverter.cs" />
+    <Compile Include="Parameters.cs" />
+    <Compile Include="Rectangle.cs" />
     <Compile Include="Fractal.cs" />
     <Compile Include="JuliaSet.cs" />
     <Compile Include="MandelbrotSet.cs" />

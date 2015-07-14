@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Numerics;
 
 namespace JuliaAndMandelbrot
 {
@@ -16,61 +15,38 @@ namespace JuliaAndMandelbrot
 
         private static void CreateJulia()
         {
-            var area = new Area(
-                upperRight: new Complex(1, 2),
-                lowerLeft: new Complex(-1, -1));
-            var juliaSet = new JuliaSet(iterations: 100,
-                area: area,
-                level: 20);
-            var set = juliaSet.Create(
-                parameter: new Complex(0.336, -0.39),
-                delta: 0.003);
-                
-            SaveImage(area, set, "JuliaSet.png", 300);
+            var parameters = Parameters.JuliaParameters;
+            var set = new JuliaSet().CreateInParallel(parameters);
+            SaveImage(parameters.Area, set, parameters.ImageName, parameters.Scale);
         }
 
         private static void CreateMandelbrot()
         {
-            var area = new Area(
-                upperRight: new Complex(0.8, 1.2),
-                lowerLeft: new Complex(-1.8, -1.2));
-            var mandelbrot = new MandelbrotSet(
-                iterations: 100,
-                area: area,
-                level: 100);
-            var set = mandelbrot.Create(
-                parameter: new Complex(0.0001, 0.0001),
-                delta: 0.001);
-            SaveImage(area, set, "MandelbrotSet.png", 400);
+            var parameters = Parameters.MandelbrotParameters;
+            var set = new MandelbrotSet().CreateInParallel(parameters);
+            SaveImage(parameters.Area, set, parameters.ImageName, parameters.Scale);
         }
 
-        static void SaveImage(Area area, IEnumerable<Complex> set, string fileName, float scale)
+        static void SaveImage(Rectangle area, IEnumerable<IterateSinglePointResult> set, string fileName, double scale)
         {
-            var minX = area.LowerLeft.Real;
-            var maxX = area.UpperRight.Real;
-            var minY = area.LowerLeft.Imaginary;
-            var maxY = area.UpperRight.Imaginary;
-            
-            var width = scale * (maxX - minX);
-            var height = scale * (maxY - minY);
-            var xOffset = Math.Abs(minX * scale);
-            var yOffset = Math.Abs(minY * scale);
+            var width = scale * (area.MaxX - area.MinX);
+            var height = scale * (area.MaxY - area.MinY);
+            var xOffset = Math.Abs(area.MinX * scale);
+            var yOffset = Math.Abs(area.MinY * scale);
 
-            using (var bitmap = new Bitmap(Convert.ToInt32(width), Convert.ToInt32(height)))
+            using (var bitmap = new Bitmap(Convert.ToInt32(width) + 1, Convert.ToInt32(height) + 1))
             {
-                using (var graphics = Graphics.FromImage(bitmap))
+                foreach (var r in set)
                 {
-                    graphics.Clear(Color.White);
-                    var pen = new Pen(Color.Black, 1);
+                    var x = (r.C.Real / (area.MaxX - area.MinX)) * width + xOffset;
+                    var y = (r.C.Imaginary / (area.MaxY - area.MinY)) * height + yOffset;
 
-                    foreach (Complex c in set)
-                    {
-                        var x = ((c.Real / (maxX - minX)) * width + xOffset);
-                        var y = ((c.Imaginary / (maxY - minY)) * height + yOffset);
-                        graphics.DrawLine(pen, (float)x, (float)y, (float)(x + 1d), (float)y);
-                    }
-                    bitmap.Save(fileName, ImageFormat.Png);
+                    bitmap.SetPixel(
+                        Convert.ToInt32(x),
+                        Convert.ToInt32(y),
+                        IterationsToColorConverter.Convert(r.Iterations));
                 }
+                bitmap.Save(fileName, ImageFormat.Png);
             }
         }
     }

@@ -4,15 +4,18 @@ namespace JuliaAndMandelbrot
 {
     public class JuliaSet : Fractal
     {
-        public JuliaSet(int iterations, Area area, double level) 
-            : base(iterations, area, level) {}
-        
-        protected override Complex? CreateCore(Complex current, Complex parameter)
+        protected override IterateSinglePointResult? CreateSinglePoint(
+            Complex current,
+            Complex parameter,
+            int maxIterations,
+            double maxMagnitude)
         {
-            return this.Iterate(
-                initial: current, 
-                offset: parameter, 
-                returnValue: current);
+            return this.IterateSinglePoint(
+                initial: current,
+                offset: parameter,
+                returnValue: current,
+                maxIterations: maxIterations,
+                maxMagnitude: maxMagnitude);
         }
     }
 }

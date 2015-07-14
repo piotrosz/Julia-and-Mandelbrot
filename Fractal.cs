@@ -1,52 +1,84 @@
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Threading.Tasks;
 
 namespace JuliaAndMandelbrot
 {
     public abstract class Fractal
     {
-        protected readonly int iterations;
-        protected readonly Area area;
-        protected readonly double level;
-
-        protected Fractal(int iterations, Area area, double level)
+        public IEnumerable<IterateSinglePointResult> Create(FractalParameters parameters)
         {
-            this.iterations = iterations;
-            this.area = area;
-            this.level = level;
-        }
-
-        public IEnumerable<Complex> Create(Complex parameter, double delta)
-        {
-            for (double real = area.LowerLeft.Real;
-                real < area.UpperRight.Real;
-                real += delta)
+            for (double real = parameters.Area.MinX; real < parameters.Area.MaxX; real += parameters.Delta)
             {
-                for (double imaginary = area.LowerLeft.Imaginary;
-                    imaginary < area.UpperRight.Imaginary;
-                    imaginary += delta)
+                for (double imaginary = parameters.Area.MinY; imaginary < parameters.Area.MaxY; imaginary += parameters.Delta)
                 {
-                    var point = this.CreateCore(new Complex(real, imaginary), parameter);
+                    var result = this.CreateSinglePoint(
+                        new Complex(real, imaginary),
+                        parameters.Parameter,
+                        parameters.MaxIterations,
+                        parameters.MaxMagnitude);
 
-                    if (point != null)
+                    if (result.HasValue)
                     {
-                        yield return point.Value;
+                        yield return result.Value;
                     }
                 }
             }
         }
 
-        protected abstract Complex? CreateCore(Complex current, Complex parameter);
+        public IEnumerable<IterateSinglePointResult> CreateInParallel(FractalParameters parameters)
+        {
+            var bag = new ConcurrentBag<IterateSinglePointResult>();
 
-        protected Complex? Iterate(Complex initial, Complex offset, Complex returnValue)
+            Parallel.ForEach(Range(parameters.Area.MinX, parameters.Area.MaxX, parameters.Delta), real =>
+            {
+                for (double imaginary = parameters.Area.MinY; imaginary < parameters.Area.MaxY; imaginary += parameters.Delta)
+                {
+                    var point = this.CreateSinglePoint(
+                                           new Complex(real, imaginary),
+                                           parameters.Parameter,
+                                           parameters.MaxIterations,
+                                           parameters.MaxMagnitude);
+
+                    if (point.HasValue)
+                    {
+                        bag.Add(point.Value);
+                    }
+                }
+            });
+
+            return bag;
+        }
+
+        private static IEnumerable<double> Range(double min, double max, double step)
+        {
+            for (double i = min; i <= max; i += step)
+            {
+                yield return i;
+            }
+        }
+
+        protected abstract IterateSinglePointResult? CreateSinglePoint(
+            Complex current,
+            Complex parameter,
+            int maxIterations,
+            double maxMagnitude);
+
+        protected IterateSinglePointResult? IterateSinglePoint(
+            Complex initial,
+            Complex offset,
+            Complex returnValue,
+            int maxIterations,
+            double maxMagnitude)
         {
             var z1 = initial;
-            for (int i = 0; i < iterations; i++)
+            for (int i = 0; i < maxIterations; i++)
             {
                 z1 = z1 * z1 + offset;
-                if (z1.Magnitude > level)
+                if (z1.Magnitude > maxMagnitude)
                 {
-                    return returnValue;
+                    return new IterateSinglePointResult { C = returnValue, Iterations = i };
                 }
             }
             return null;

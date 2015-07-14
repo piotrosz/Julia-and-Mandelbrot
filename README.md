@@ -1,9 +1,7 @@
 ## Julia and Mandelbrot ##
 
-Simple console application that helps to understand the difference between Julia and Mandelbrot fractal sets.
+Simple console application that shows the difference between Julia and Mandelbrot fractal sets.
 
-![Mandelbrot set](http://if.pw.edu.pl/~ludwik/images/mandelbrot_set.png)
+![Mandelbrot set](http://if.pw.edu.pl/~ludwik/images/Mandelbrot.png)
 
-![Julia set](http://if.pw.edu.pl/~ludwik/images/julia_set.png)
-
-TODO: Add parallelism
+![Julia set](http://if.pw.edu.pl/~ludwik/images/Julia.png)
